@@ -21,6 +21,8 @@ EOS
   s.files = Dir['lib/**/*.rb']
   s.require_paths = ['lib']
 
+  s.add_runtime_dependency 'websocket-driver',                  '~> 0.6.5'
+
   s.add_development_dependency 'rake',                          '~> 12.0'
   s.add_development_dependency 'rspec',                         '~> 3.1'
   s.add_development_dependency 'yard',                          '~> 0.9'
