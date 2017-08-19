@@ -10,7 +10,7 @@ module Pcptool; end
 
 # A wrapper that joins a socket to a WebSocket::Driver
 #
-# @api public
+# @api private
 # @since 0.0.1
 class Pcptool::WebSocket
   include Observable

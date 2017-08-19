@@ -13,7 +13,7 @@ require 'pcptool/config'
 # via asynchronous streams to be produced and consumed by synchronous
 # processes.
 #
-# @api public
+# @api private
 # @since 0.0.1
 class Pcptool::EventedSocket
   extend Forwardable
