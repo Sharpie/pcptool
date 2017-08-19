@@ -20,6 +20,17 @@ class Pcptool::EventedSocket
 
   instance_delegate([:logger] => :@config)
 
+  # Create a new EventedSocket instance
+  #
+  # @param hostname [String] The hostname or IP address to connect with.
+  # @param port [Integer] The port number to establish a connection on.
+  # @param ssl [OpenSSL::SSL::SSLContext, nil] An instance of
+  #   `OpenSSL::SSL::SSLContext` or `nil`. Passing a SSLContext will cause
+  #   the connection to be wrapped in a TLS session while `nil` will disable
+  #   the use of TLS. Defaults to `nil`.
+  # @param config [Pcptool::Config::Settings]
+  #
+  # @return [void]
   def initialize(hostname, port, ssl: nil, config: Pcptool::Config.config)
     raise ArgumentError, "Port number must be an integer" unless port.is_a?(Integer)
     @hostname = hostname
@@ -35,6 +46,9 @@ class Pcptool::EventedSocket
   end
 
   # Establish a connection to the remote server
+  #
+  # @param timeout [Integer] Number of seconds to wait when establishing a
+  #   TCP or TLS connection. Set to 0 to disable. Defaults to 30 seconds.
   #
   # @raise [Errno::ECONNREFUSED] When the server is not listening.
   # @raise [SocketError] When the server hostname cannot be resolved.
@@ -94,10 +108,16 @@ class Pcptool::EventedSocket
     start_threads
   end
 
+  # Check if the connection is closed
+  #
+  # @return [Boolean]
   def closed?
     @state == :closed
   end
 
+  # Close a connection to the remote server
+  #
+  # @return [void]
   def close
     return if closed?
 
@@ -121,10 +141,25 @@ class Pcptool::EventedSocket
     @read_wakeup.first.read_nonblock(1024) rescue nil
   end
 
+  # Read data from the remote server
+  #
+  # This call will block until data arrives on the Socket.
+  #
+  # @return [String] A string of up to 16,384 bytes of data
+  #   received by the socket.
   def read
     @read_queue.pop
   end
 
+  # Write data to the remote server
+  #
+  # This call pushes a string of data onto an internal dispatch
+  # queue. An internal worker thread will eventually write it
+  # to the network connection.
+  #
+  # @param data [String]
+  #
+  # @return [void]
   def write(data)
     @write_queue.push(data)
   end

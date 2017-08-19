@@ -1,0 +1,4 @@
+--verbose
+--markup markdown
+--readme README.md
+lib/**/*.rb
