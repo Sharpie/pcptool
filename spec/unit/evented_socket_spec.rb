@@ -58,28 +58,14 @@ describe Pcptool::EventedSocket do
       subject { described_class.new(host, port, ssl: client_ssl) }
 
       context "and the server doesn't support TLS" do
-        include_context('TCP server')
+        include_context('TCP Server')
+        let(:tcp_accept_handler) do
+          lambda do |socket|
+            socket.write("HTTP/1.1 400 Bad Request\r\n")
+            socket.flush
 
-        before(:each) do
-          @srv_sock = nil
-
-          @accept_thread = Thread.new do
-            begin
-              @srv_sock, _ = @server.accept
-
-              @srv_sock.write("HTTP/1.1 400 Bad Request\r\n")
-              @srv_sock.flush
-
-              @srv_sock.close
-            rescue => e
-              puts "#{e.class} error in server accept thread: #{e.message}"
-            end
+            socket.close
           end
-        end
-
-        after(:each) do
-          @accept_thread.kill
-          @accept_thread.join
         end
 
         it 'fails to connect' do
@@ -91,25 +77,6 @@ describe Pcptool::EventedSocket do
       context "and the server's cert is signed by a different CA" do
         include_context('TLS Server', ca: 'ca-02', certname: 'pcp-broker.test')
 
-        before(:each) do
-          @srv_sock = nil
-
-          @accept_thread = Thread.new do
-            begin
-              @srv_sock, _ = @server.accept
-
-              @srv_sock.close
-            rescue => e
-              puts "#{e.class} error in server accept thread: #{e.message}"
-            end
-          end
-        end
-
-        after(:each) do
-          @accept_thread.kill
-          @accept_thread.join
-        end
-
         it 'fails to connect' do
           expect(test_logger).to receive(:error).with(/SSL_connect .* certificate verify failed/)
           expect { subject.connect }.to raise_error(OpenSSL::SSL::SSLError)
@@ -119,25 +86,6 @@ describe Pcptool::EventedSocket do
       context "and the server's cert is revoked" do
         include_context('TLS Server', ca: 'ca-01', certname: 'pcp-broker-revoked.test')
 
-        before(:each) do
-          @srv_sock = nil
-
-          @accept_thread = Thread.new do
-            begin
-              @srv_sock, _ = @server.accept
-
-              @srv_sock.close
-            rescue => e
-              puts "#{e.class} error in server accept thread: #{e.message}"
-            end
-          end
-        end
-
-        after(:each) do
-          @accept_thread.kill
-          @accept_thread.join
-        end
-
         it 'fails to connect' do
           expect(test_logger).to receive(:error).with(/SSL_connect .* certificate verify failed/)
           expect { subject.connect }.to raise_error(OpenSSL::SSL::SSLError)
@@ -146,25 +94,6 @@ describe Pcptool::EventedSocket do
 
       context "and the server's cert does not match the hostname" do
         include_context('TLS Server', ca: 'ca-01', certname: 'pcp-broker-noaltname.test')
-
-        before(:each) do
-          @srv_sock = nil
-
-          @accept_thread = Thread.new do
-            begin
-              @srv_sock, _ = @server.accept
-
-              @srv_sock.close
-            rescue => e
-              puts "#{e.class} error in server accept thread: #{e.message}"
-            end
-          end
-        end
-
-        after(:each) do
-          @accept_thread.kill
-          @accept_thread.join
-        end
 
         it 'fails to connect' do
           expect(test_logger).to receive(:error).with(/hostname "#{host}" does not match the server certificate/)
