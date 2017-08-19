@@ -67,6 +67,9 @@ describe Pcptool::EventedSocket do
             begin
               @srv_sock, _ = @server.accept
 
+              @srv_sock.write("HTTP/1.1 400 Bad Request\r\n")
+              @srv_sock.flush
+
               @srv_sock.close
             rescue => e
               puts "#{e.class} error in server accept thread: #{e.message}"
@@ -80,7 +83,7 @@ describe Pcptool::EventedSocket do
         end
 
         it 'fails to connect' do
-          expect(test_logger).to receive(:error).with(/SSL_connect .* read server hello/)
+          expect(test_logger).to receive(:error).with(/SSL_connect .* unknown protocol/)
           expect { subject.connect }.to raise_error(OpenSSL::SSL::SSLError)
         end
       end
