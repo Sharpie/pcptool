@@ -15,7 +15,10 @@ describe Pcptool::EventedSocket do
   describe '#connect' do
     include_context('test logging')
 
-    subject { described_class.new('localhost', 18142) }
+    let(:host) { 'localhost' }
+    let(:port) { 18142}
+
+    subject { described_class.new(host, port) }
 
     context 'when establishing a TCP connection' do
       it 'raises Errno::ECONNREFUSED when the server is not listening' do
@@ -23,19 +26,23 @@ describe Pcptool::EventedSocket do
         expect { subject.connect }.to raise_error(Errno::ECONNREFUSED)
       end
 
-      it 'raises RuntimeError when the server hostname cannot be resolved' do
-        socket = described_class.new('testname.invalid', 18142)
+      context 'when the server hostname cannot be resolved' do
+        let(:host) { 'testname.invalid' }
 
-        expect(test_logger).to receive(:error).with(/Could not resolve the hostname "testname\.invalid" to an IP address/)
-        expect { socket.connect }.to raise_error(SocketError)
+        it 'raises a RuntimeError' do
+          expect(test_logger).to receive(:error).with(/Could not resolve the hostname "#{host}" to an IP address/)
+          expect { subject.connect }.to raise_error(SocketError)
+        end
       end
 
       context 'when connections are not accepted' do
-        include_context('TCP server', listen: false)
         let(:timeout) { 1 }
 
+        # RFC 5737 non-routable IP address.
+        let(:host) { '192.0.2.1' }
+
         it 'times out when connecting' do
-          expect(test_logger).to receive(:error).with(/Connection attempt to "localhost" timed out after #{timeout} seconds/)
+          expect(test_logger).to receive(:error).with(/Connection attempt to "#{host}" timed out after #{timeout} seconds/)
 
           expect{ Timeout.timeout(5){ subject.connect(timeout: timeout) }}.to raise_error(Errno::ETIMEDOUT)
         end
@@ -48,7 +55,7 @@ describe Pcptool::EventedSocket do
                       ca: 'ca-01',
                       certname: 'pcptool.test',
                       verify_mode: OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT)
-      subject { described_class.new('localhost', 18142, ssl: client_ssl) }
+      subject { described_class.new(host, port, ssl: client_ssl) }
 
       context "and the server doesn't support TLS" do
         include_context('TCP server')

@@ -17,7 +17,7 @@ RSpec.shared_context('test logging') do
   end
 end
 
-RSpec.shared_context('TCP server') do |host: 'localhost', port: 18142, listen: true|
+RSpec.shared_context('TCP server') do |host: 'localhost', port: 18142|
   # Sets up a TCP server bound to the given socket before each example and
   # then tears it down afterwards.
   before(:each) do
@@ -33,7 +33,7 @@ RSpec.shared_context('TCP server') do |host: 'localhost', port: 18142, listen: t
 
     # Established connections can be retrieved by calling @server.accept
     # inside of a test.
-    @server.listen(128) if listen
+    @server.listen(128)
   end
 
   after(:each) do
@@ -70,7 +70,7 @@ RSpec.shared_context('TLS Context') do |name:, ca:, certname:, verify_mode: Open
   end
 end
 
-RSpec.shared_context('TLS Server') do |ca:, certname:, host: 'localhost', port: 18142, listen: true|
+RSpec.shared_context('TLS Server') do |ca:, certname:, host: 'localhost', port: 18142|
   # Sets up a TLS server bound to the given port before each example and then
   # tears it down afterwards.
   include_context('TLS Context', name: :server_ssl, ca: ca, certname: certname)
@@ -90,7 +90,7 @@ RSpec.shared_context('TLS Server') do |ca:, certname:, host: 'localhost', port: 
 
     # Established connections can be retrieved by calling @server.accept
     # inside of a test.
-    @server.listen(128) if @server
+    @server.listen(128)
   end
 
   after(:each) do
