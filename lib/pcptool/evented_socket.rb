@@ -66,7 +66,22 @@ class Pcptool::EventedSocket
                 tcp_socket
               else
                 ssl = OpenSSL::SSL::SSLSocket.new(tcp_socket, @ssl_context)
+                ssl.hostname = @hostname
+
                 connect_with_timeout!(ssl, timeout)
+
+                unless ssl.context.verify_mode == OpenSSL::SSL::VERIFY_NONE
+                  begin
+                    ssl.post_connection_check(@hostname)
+                  rescue OpenSSL::SSL::SSLError => e
+                    logger.error('%{error_class} raised while connecting to "%{hostname}": %{message}' % {
+                      error_class: e.class,
+                      message: e.message,
+                      hostname: @hostname})
+
+                    raise e
+                  end
+                end
 
                 ssl
               end
