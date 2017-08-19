@@ -232,7 +232,7 @@ class Pcptool::EventedSocket
                # NOTE: Also rescue WaitWritable due to SSL re-negotiation.
              end # FIXME: Error handling!
 
-      puts "Received: #{data}" unless data.nil?
+      logger.debug { "Received: #{data}" } unless data.nil?
       @read_queue.push(data) unless data.nil?
 
       # Thread sleeps here until data comes in on the socket or something
@@ -256,7 +256,7 @@ class Pcptool::EventedSocket
       data = @write_queue.pop
 
       unless data.nil?
-        puts "Sent: #{data}" unless data.nil?
+        logger.debug { "Sent: #{data}" } unless data.nil?
         written = begin
                     @socket.write_nonblock(data)
                   # NOTE: Also rescue WaitReadable due to SSL re-negotiation.
