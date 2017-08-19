@@ -74,10 +74,11 @@ class Pcptool::EventedSocket
                   begin
                     ssl.post_connection_check(@hostname)
                   rescue OpenSSL::SSL::SSLError => e
-                    logger.error('%{error_class} raised while connecting to "%{hostname}": %{message}' % {
+                    logger.error('%{error_class} raised while connecting to "%{hostname}:%{port}": %{message}' % {
                       error_class: e.class,
                       message: e.message,
-                      hostname: @hostname})
+                      hostname: @hostname,
+                      port: @port})
 
                     raise e
                   end
@@ -139,8 +140,9 @@ class Pcptool::EventedSocket
       return
     end
 
-    timeout_error = 'Connection attempt to "%{hostname}" timed out after %{timeout} seconds' % {
+    timeout_error = 'Connection attempt to "%{hostname}:%{port}" timed out after %{timeout} seconds' % {
       hostname: @hostname,
+      port: @port,
       timeout: timeout}
 
     begin
@@ -169,10 +171,11 @@ class Pcptool::EventedSocket
         # Already closed.
       end
 
-      logger.error('%{error_class} raised while connecting to "%{hostname}": %{message}' % {
+      logger.error('%{error_class} raised while connecting to "%{hostname}:%{port}": %{message}' % {
         error_class: e.class,
         message: e.message,
-        hostname: @hostname})
+        hostname: @hostname,
+        port: @port})
 
       raise e
     end

@@ -22,7 +22,7 @@ describe Pcptool::EventedSocket do
 
     context 'when establishing a TCP connection' do
       it 'raises Errno::ECONNREFUSED when the server is not listening' do
-        expect(test_logger).to receive(:error).with(/ECONNREFUSED raised while connecting to "localhost"/)
+        expect(test_logger).to receive(:error).with(/ECONNREFUSED raised while connecting to "#{host}:#{port}"/)
         expect { subject.connect }.to raise_error(Errno::ECONNREFUSED)
       end
 
@@ -42,7 +42,7 @@ describe Pcptool::EventedSocket do
         let(:host) { '192.0.2.1' }
 
         it 'times out when connecting' do
-          expect(test_logger).to receive(:error).with(/Connection attempt to "#{host}" timed out after #{timeout} seconds/)
+          expect(test_logger).to receive(:error).with(/Connection attempt to "#{host}:#{port}" timed out after #{timeout} seconds/)
 
           expect{ Timeout.timeout(5){ subject.connect(timeout: timeout) }}.to raise_error(Errno::ETIMEDOUT)
         end
@@ -167,7 +167,7 @@ describe Pcptool::EventedSocket do
         end
 
         it 'fails to connect' do
-          expect(test_logger).to receive(:error).with(/hostname "localhost" does not match the server certificate/)
+          expect(test_logger).to receive(:error).with(/hostname "#{host}" does not match the server certificate/)
           expect { subject.connect }.to raise_error(OpenSSL::SSL::SSLError)
         end
       end
