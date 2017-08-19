@@ -16,7 +16,7 @@ describe Pcptool::EventedSocket do
     include_context('test logging')
 
     let(:host) { 'localhost' }
-    let(:port) { 18142}
+    let(:port) { 18142 }
 
     subject { described_class.new(host, port) }
 
@@ -59,6 +59,7 @@ describe Pcptool::EventedSocket do
 
       context "and the server doesn't support TLS" do
         include_context('TCP Server')
+
         let(:tcp_accept_handler) do
           lambda do |socket|
             socket.write("HTTP/1.1 400 Bad Request\r\n")
